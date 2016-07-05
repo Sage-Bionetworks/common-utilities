@@ -9,7 +9,7 @@ import java.util.concurrent.Callable;
  * 
  * @param <R>
  *            The return type of the callable.
- *            {@link ProgressCallback#progressMade(Object)}.
+ *            {@link #call(Object)}.
  * @param <T>
  *            The parameter type passed to the
  *            {@link ProgressCallback#progressMade(Object)}.
@@ -21,7 +21,7 @@ public interface ProgressingCallable<R, T> {
 	 * provided so the callable can notify a container that progress is still
 	 * being made.
 	 * 
-	 * @param callback
+	 * @param callback <R>
 	 * @return
 	 * @throws Exception
 	 */
