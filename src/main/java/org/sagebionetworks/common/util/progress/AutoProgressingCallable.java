@@ -20,12 +20,11 @@ import java.util.concurrent.TimeoutException;
  *            The parameter type passed to the
  *            {@link ProgressCallback#progressMade(Object)}.
  */
-public class AutoProgressingCallable<R, T> implements ProgressingCallable<R, T> {
+public class AutoProgressingCallable<R> implements ProgressingCallable<R, Void> {
 
 	ExecutorService executor;
 	Callable<R> callable;
 	long progressFrequencyMs;
-	T parameter;
 
 	/**
 	 * Create a new AutoProgressingCallable for each use.
@@ -43,7 +42,7 @@ public class AutoProgressingCallable<R, T> implements ProgressingCallable<R, T> 
 	 *            The parameter to be passed to the progress callback.
 	 */
 	public AutoProgressingCallable(ExecutorService executor,
-			Callable<R> callable, long progressFrequencyMs, T parameter) {
+			Callable<R> callable, long progressFrequencyMs) {
 		super();
 		if(executor == null){
 			throw new IllegalArgumentException("Executor cannot be null");
@@ -54,15 +53,14 @@ public class AutoProgressingCallable<R, T> implements ProgressingCallable<R, T> 
 		this.executor = executor;
 		this.callable = callable;
 		this.progressFrequencyMs = progressFrequencyMs;
-		this.parameter = parameter;
 	}
 
 	@Override
-	public R call(ProgressCallback<T> callback) throws Exception {
+	public R call(ProgressCallback<Void> callback) throws Exception {
 		// start the process
 		Future<R> future = executor.submit(callable);
 		// make progress at least once.
-		callback.progressMade(parameter);
+		callback.progressMade(null);
 		while (true) {
 			// wait for the process to finish
 			try {
@@ -76,7 +74,7 @@ public class AutoProgressingCallable<R, T> implements ProgressingCallable<R, T> 
 				throw e;
 			}catch (TimeoutException e) {
 				// make progress for each timeout
-				callback.progressMade(parameter);
+				callback.progressMade(null);
 			}
 		}
 	}

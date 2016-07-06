@@ -1,9 +1,12 @@
 package org.sagebionetworks.common.util.progress;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -28,19 +31,17 @@ public class AutoProgressingCallableTest {
 	@Mock
 	Callable<Integer> mockCallable;
 	@Mock
-	ProgressCallback<String> mockCallback;
+	ProgressCallback<Void> mockCallback;
 
-	AutoProgressingCallable<Integer, String> auto;
+	AutoProgressingCallable<Integer> auto;
 
 	Integer returnValue;
 	long progressFrequencyMs;
-	String parameter;
 
 	@Before
 	public void before() throws Exception {
 		MockitoAnnotations.initMocks(this);
 		returnValue = 101;
-		parameter = "foo";
 
 		progressFrequencyMs = 1000;
 		when(mockExecutor.submit(mockCallable)).thenReturn(mockFuture);
@@ -49,8 +50,8 @@ public class AutoProgressingCallableTest {
 				.thenThrow(new TimeoutException())
 				.thenThrow(new TimeoutException()).thenReturn(returnValue);
 
-		auto = new AutoProgressingCallable<Integer, String>(mockExecutor,
-				mockCallable, progressFrequencyMs, parameter);
+		auto = new AutoProgressingCallable<Integer>(mockExecutor,
+				mockCallable, progressFrequencyMs);
 	}
 
 	@Test
@@ -59,7 +60,7 @@ public class AutoProgressingCallableTest {
 		Integer result = auto.call(mockCallback);
 		assertEquals(returnValue, result);
 		verify(mockExecutor).submit(mockCallable);
-		verify(mockCallback, times(3)).progressMade(parameter);
+		verify(mockCallback, times(3)).progressMade(null);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
@@ -75,27 +76,16 @@ public class AutoProgressingCallableTest {
 	@Test (expected=IllegalArgumentException.class)
 	public void testNullExecutor(){
 		mockExecutor = null;
-		auto = new AutoProgressingCallable<Integer, String>(mockExecutor,
-				mockCallable, progressFrequencyMs, parameter);
+		auto = new AutoProgressingCallable<Integer>(mockExecutor,
+				mockCallable, progressFrequencyMs);
 	}
 	
 	@Test (expected=IllegalArgumentException.class)
 	public void testNullCallable(){
 		mockCallable = null;
-		auto = new AutoProgressingCallable<Integer, String>(mockExecutor,
-				mockCallable, progressFrequencyMs, parameter);
+		auto = new AutoProgressingCallable<Integer>(mockExecutor,
+				mockCallable, progressFrequencyMs);
 	}
 	
-	@Test
-	public void testCallNullParameter() throws Exception {
-		parameter = null;
-		auto = new AutoProgressingCallable<Integer, String>(mockExecutor,
-				mockCallable, progressFrequencyMs, parameter);
-		// call under test.
-		Integer result = auto.call(mockCallback);
-		assertEquals(returnValue, result);
-		verify(mockExecutor).submit(mockCallable);
-		verify(mockCallback, times(3)).progressMade(parameter);
-	}
 
 }
