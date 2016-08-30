@@ -1,5 +1,6 @@
 package org.sagebionetworks.common.util.progress;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -73,6 +74,11 @@ public class PathNormalizerTest {
 	@Test
 	public void entityAliasUrlTest() {
 		assertEquals("/entity/alias/#", normalizeMethodSignature("/repo/v1/entity/alias/auditData"));
+	}
+	
+	@Test
+	public void pathBeforeV1Prefix(){
+		assertEquals("/there/is/random/v1/included/#", normalizeMethodSignature("prefixShouldBeDeleted/repo/v1/there/is/random/v1/included/syn12345")); 
 	}
 
 }

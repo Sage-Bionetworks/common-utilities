@@ -7,7 +7,7 @@ import java.util.regex.Pattern;
  * Utility class for normalizing request paths
  */
 public class PathNormalizer {
-	private static final String V1_PREFIX = "/v1/";
+	private static final Pattern EXPECTED_PREFIX_PATTERN = Pattern.compile("[file|repo|auth]/v1");
 	
 	private static final Pattern NUMERIC_PARAM_PATTERN = Pattern.compile("/(syn\\d+|\\d+)");
 	private static final String GET_MD5_URL_PART = "/entity/md5";
@@ -23,12 +23,12 @@ public class PathNormalizer {
 	 */
 	public static String normalizeMethodSignature(String requestPath) {
 		requestPath = requestPath.toLowerCase();
-		int indexOfValidPathPrefix = requestPath.indexOf(V1_PREFIX);
-		if (indexOfValidPathPrefix == -1) {
-			throw new IllegalArgumentException("requestPath must contain " + V1_PREFIX);
+		Matcher expectedPrefixMatcher = EXPECTED_PREFIX_PATTERN.matcher(requestPath);
+		if (expectedPrefixMatcher.find()) {
+			requestPath =requestPath.substring(expectedPrefixMatcher.end());
+		} else{
+			throw new IllegalArgumentException("requestPath must contain repo/v1/, auth/v1/, or file/v1/");
 		}
-		
-		requestPath = requestPath.substring(indexOfValidPathPrefix + V1_PREFIX.length() - 1);
 
 		if (requestPath.startsWith(GET_MD5_URL_PART)) {
 			return GET_MD5_URL_PART + NUMBER_REPLACEMENT;
