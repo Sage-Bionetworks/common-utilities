@@ -77,7 +77,17 @@ public class PathNormalizerTest {
 	
 	@Test
 	public void pathBeforeV1Prefix(){
-		assertEquals("/there/is/random/v1/included/#", normalizeMethodSignature("prefixShouldBeDeleted/repo/v1/there/is/random/v1/included/syn12345")); 
+		assertEquals("/there/is/random/v1/included/#", normalizeMethodSignature("prefixShould-BeDeleted/repo/v1/there/is/random/v1/included/syn12345")); 
+	}
+	
+	@Test (expected = IllegalArgumentException.class)
+	public void moreThanOnePrefixBeforeServiceAndV1(){
+		normalizeMethodSignature("prefix/Should-Be/Delet-ed/repo/v1/there/is/random/v1/included/syn12345");
+	}
+	
+	@Test (expected = IllegalArgumentException.class)
+	public void manyForwardSlashesBeforeServiceAndV1(){
+		normalizeMethodSignature("prefix//repo/v1/there/is/random/v1/included/syn12345");
 	}
 
 }

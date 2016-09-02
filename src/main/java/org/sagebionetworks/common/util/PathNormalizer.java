@@ -7,7 +7,7 @@ import java.util.regex.Pattern;
  * Utility class for normalizing request paths
  */
 public class PathNormalizer {
-	private static final Pattern EXPECTED_PREFIX_PATTERN = Pattern.compile("^\\w*/[a-z]*/v1/");
+	private static final Pattern EXPECTED_PREFIX_PATTERN = Pattern.compile("^[^/]*/[a-z]*/v1/");
 	
 	private static final Pattern NUMERIC_PARAM_PATTERN = Pattern.compile("/(syn\\d+|\\d+)");
 	private static final String GET_MD5_URL_PART = "/entity/md5";
@@ -27,7 +27,7 @@ public class PathNormalizer {
 		if (expectedPrefixMatcher.find()) {
 			requestPath =requestPath.substring(expectedPrefixMatcher.end()-1);
 		} else{
-			throw new IllegalArgumentException("requestPath must contain repo/v1/, auth/v1/, or file/v1/");
+			throw new IllegalArgumentException("requestPath: " + requestPath + " was not correctly formatted. It must start with {optional WAR name}/{any string}/v1/");
 		}
 
 		if (requestPath.startsWith(GET_MD5_URL_PART)) {
