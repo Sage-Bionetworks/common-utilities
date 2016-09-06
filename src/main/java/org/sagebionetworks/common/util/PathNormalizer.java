@@ -3,8 +3,6 @@ package org.sagebionetworks.common.util;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.swing.plaf.basic.BasicInternalFrameTitlePane.IconifyAction;
-
 /**
  * Utility class for normalizing request paths
  */
