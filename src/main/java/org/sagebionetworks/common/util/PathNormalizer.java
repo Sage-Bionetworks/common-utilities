@@ -3,12 +3,13 @@ package org.sagebionetworks.common.util;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.swing.plaf.basic.BasicInternalFrameTitlePane.IconifyAction;
+
 /**
  * Utility class for normalizing request paths
  */
 public class PathNormalizer {
-	private static final Pattern EXPECTED_PREFIX_PATTERN = Pattern.compile("^/([\\w\\-]*/)?[a-z]*/v1/");
-	
+	private static final String PREFIXES_TO_REMOVE_DELIMITER = "/v1/";
 	private static final Pattern NUMERIC_PARAM_PATTERN = Pattern.compile("/(syn\\d+|\\d+)");
 	private static final String GET_MD5_URL_PART = "/entity/md5";
 	private static final String GET_EVALUATION_NAME_URL_PART = "/evaluation/name";
@@ -23,12 +24,11 @@ public class PathNormalizer {
 	 */
 	public static String normalizeMethodSignature(String requestPath) {
 		requestPath = requestPath.toLowerCase();
-		Matcher expectedPrefixMatcher = EXPECTED_PREFIX_PATTERN.matcher(requestPath);
-		if (expectedPrefixMatcher.find()) {
-			requestPath =requestPath.substring(expectedPrefixMatcher.end()-1);
-		} else{
+		int prefixIndex = requestPath.indexOf(PREFIXES_TO_REMOVE_DELIMITER);
+		if (prefixIndex == -1) {
 			throw new IllegalArgumentException("requestPath: " + requestPath + " was not correctly formatted. It must start with {optional WAR name}/{any string}/v1/");
 		}
+		requestPath = requestPath.substring(prefixIndex + PREFIXES_TO_REMOVE_DELIMITER.length() - 1);
 
 		if (requestPath.startsWith(GET_MD5_URL_PART)) {
 			return GET_MD5_URL_PART + NUMBER_REPLACEMENT;
