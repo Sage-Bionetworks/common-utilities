@@ -86,6 +86,11 @@ public class PathNormalizerTest {
 		assertEquals("/entity", normalizeMethodSignature("/services-repository-develop-SNAPSHOT/repo/v1/entity")); 
 	}
 	
+	@Test
+	public void multipleV1s(){
+		assertEquals("/v1/repo/v1/entity", normalizeMethodSignature("/services-repository-develop-SNAPSHOT/repo/v1/v1/repo/v1/entity")); 
+	}
+	
 	@Test (expected = IllegalArgumentException.class)
 	public void moreThanOnePrefixBeforeServiceAndV1(){
 		normalizeMethodSignature("/prefix/Should-Be/Delet-ed/repo/v1/there/is/random/v1/included/syn12345");
