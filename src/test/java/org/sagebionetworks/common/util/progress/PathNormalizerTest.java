@@ -85,6 +85,10 @@ public class PathNormalizerTest {
 	public void warNameCapitalizedBeforeV1Prefix(){
 		assertEquals("/entity", normalizeMethodSignature("/services-repository-develop-SNAPSHOT/repo/v1/entity")); 
 	}
+	@Test
+	public void warNameWithNumbers(){
+		assertEquals("/entity", normalizeMethodSignature("/services-repository-2016-09-06-2313-ec7939b/repo/v1/entity"));
+	}
 	
 	@Test
 	public void multipleV1s(){
