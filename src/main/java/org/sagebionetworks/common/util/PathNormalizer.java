@@ -7,7 +7,7 @@ import java.util.regex.Pattern;
  * Utility class for normalizing request paths
  */
 public class PathNormalizer {
-	private static final Pattern EXPECTED_PREFIX_PATTERN = Pattern.compile("^/([a-zA-z\\-]*/)?[a-z]*/v1/");
+	private static final Pattern EXPECTED_PREFIX_PATTERN = Pattern.compile("^/([a-z\\-]*/)?[a-z]*/v1/");
 	
 	private static final Pattern NUMERIC_PARAM_PATTERN = Pattern.compile("/(syn\\d+|\\d+)");
 	private static final String GET_MD5_URL_PART = "/entity/md5";

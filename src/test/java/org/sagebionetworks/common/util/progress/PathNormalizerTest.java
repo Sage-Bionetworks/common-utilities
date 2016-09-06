@@ -1,5 +1,6 @@
 package org.sagebionetworks.common.util.progress;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -78,6 +79,11 @@ public class PathNormalizerTest {
 	@Test
 	public void warNameBeforeV1Prefix(){
 		assertEquals("/entity", normalizeMethodSignature("/services-repository-develop-snapshot/repo/v1/entity")); 
+	}
+	
+	@Test
+	public void warNameCapitalizedBeforeV1Prefix(){
+		assertEquals("/entity", normalizeMethodSignature("/services-repository-develop-SNAPSHOT/repo/v1/entity")); 
 	}
 	
 	@Test (expected = IllegalArgumentException.class)
