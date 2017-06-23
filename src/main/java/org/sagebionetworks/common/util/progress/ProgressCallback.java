@@ -6,11 +6,12 @@ package org.sagebionetworks.common.util.progress;
  * @param <T> The parameter type passed to the
  *            {@link ProgressCallback#progressMade(Object)}.
  */
-public interface ProgressCallback<T> {
-
+public interface ProgressCallback<T> extends ProgressListener<T> {
+	
 	/**
-	 * Called when a worker makes progress.
-	 * @param t
+	 * Progress listeners are notified as progress is made.
+	 * 
+	 * @param listener
 	 */
-	public void progressMade(T t);
+	public void addProgressListener(ProgressListener<T> listener);
 }
