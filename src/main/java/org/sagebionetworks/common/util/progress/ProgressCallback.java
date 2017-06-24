@@ -14,4 +14,12 @@ public interface ProgressCallback<T> extends ProgressListener<T> {
 	 * @param listener
 	 */
 	public void addProgressListener(ProgressListener<T> listener);
+	
+	/**
+	 * Remove the given progress listener. The given listener
+	 * will no longer receive messages.
+	 * 
+	 * @param listener
+	 */
+	public void removeProgressListener(ProgressListener<T> listener);
 }
