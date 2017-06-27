@@ -1,8 +1,5 @@
 package org.sagebionetworks.common.util.progress;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import org.sagebionetworks.common.util.Clock;
 import org.sagebionetworks.common.util.ClockImpl;
 
@@ -19,20 +16,18 @@ import org.sagebionetworks.common.util.ClockImpl;
  * 
  * @param <T>
  */
-public final class ThrottlingProgressCallback<T> implements ProgressCallback<T> {
+public final class ThrottlingProgressCallback<T> extends AbstractProgressCallback<T> {
 
-	List<ProgressListener<T>> listeners;
 	long frequencyMS;
 	long lastFiredTime;
 	Clock clock;
-	int maxNumberListeners;
 
 	/**
 	 * @param targetCallback Calls to {@link #progressMade(Object)} will be forward to this target unless throttled.
 	 * @param frequencyMS The frequency in milliseconds that calls should be forwarded to the target.
 	 */
-	public ThrottlingProgressCallback(long frequencyMS, int maxNumberListeners) {
-		this(frequencyMS, maxNumberListeners, new ClockImpl());
+	public ThrottlingProgressCallback(long frequencyMS) {
+		this(frequencyMS, new ClockImpl());
 	}
 
 	/**
@@ -41,16 +36,14 @@ public final class ThrottlingProgressCallback<T> implements ProgressCallback<T> 
 	 * @param frequencyMS
 	 * @param clock
 	 */
-	public ThrottlingProgressCallback(long frequencyMS, int maxNumberListeners, Clock clock) {
+	public ThrottlingProgressCallback(long frequencyMS, Clock clock) {
 		super();
-		this.listeners = new LinkedList<ProgressListener<T>>();
 		this.frequencyMS = frequencyMS;
 		if(clock == null){
 			throw new IllegalArgumentException("Clock cannot be null");
 		}
 		this.clock = clock;
 		this.lastFiredTime = -1;
-		this.maxNumberListeners = maxNumberListeners;
 	}
 
 
@@ -69,31 +62,4 @@ public final class ThrottlingProgressCallback<T> implements ProgressCallback<T> 
 			}
 		}
 	}
-	
-	/**
-	 * When progress is made notify all listeners.
-	 * @param t
-	 */
-	private void fireProgressMade(T t){
-		for(ProgressListener<T> listener: listeners){
-			listener.progressMade(t);
-		}
-	}
-
-	@Override
-	public void addProgressListener(ProgressListener<T> listener) {
-		// add the listener if it is not already on the list
-		if(!listeners.contains(listener)){
-			this.listeners.add(listener);
-		}
-		if(listeners.size() > maxNumberListeners){
-			throw new IllegalArgumentException("Maxiumn number of listeners exceeded");
-		}
-	}
-
-	@Override
-	public void removeProgressListener(ProgressListener<T> listener) {
-		this.listeners.remove(listener);
-	}
-
 }
