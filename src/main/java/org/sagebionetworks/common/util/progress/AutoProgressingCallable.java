@@ -23,7 +23,7 @@ import java.util.concurrent.TimeoutException;
 public class AutoProgressingCallable<R> implements ProgressingCallable<R, Void> {
 
 	ExecutorService executor;
-	Callable<R> callable;
+	ProgressingCallable<R, Void> callable;
 	long progressFrequencyMs;
 
 	/**
@@ -42,7 +42,7 @@ public class AutoProgressingCallable<R> implements ProgressingCallable<R, Void> 
 	 *            The parameter to be passed to the progress callback.
 	 */
 	public AutoProgressingCallable(ExecutorService executor,
-			Callable<R> callable, long progressFrequencyMs) {
+			ProgressingCallable<R, Void> callable, long progressFrequencyMs) {
 		super();
 		if(executor == null){
 			throw new IllegalArgumentException("Executor cannot be null");
@@ -56,9 +56,13 @@ public class AutoProgressingCallable<R> implements ProgressingCallable<R, Void> 
 	}
 
 	@Override
-	public R call(ProgressCallback<Void> callback) throws Exception {
+	public R call(final ProgressCallback<Void> callback) throws Exception {
 		// start the process
-		Future<R> future = executor.submit(callable);
+		Future<R> future = executor.submit(new Callable<R>(){
+			@Override
+			public R call() throws Exception {
+				return callable.call(callback);
+			}});
 		// make progress at least once.
 		callback.progressMade(null);
 		while (true) {

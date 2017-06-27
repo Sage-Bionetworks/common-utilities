@@ -3,10 +3,7 @@ package org.sagebionetworks.common.util.progress;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -19,6 +16,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 public class AutoProgressingCallableTest {
 
@@ -29,7 +28,7 @@ public class AutoProgressingCallableTest {
 	Future<Integer> mockFuture;
 
 	@Mock
-	Callable<Integer> mockCallable;
+	ProgressingCallable<Integer, Void> mockCallable;
 	@Mock
 	ProgressCallback<Void> mockCallback;
 
@@ -44,7 +43,15 @@ public class AutoProgressingCallableTest {
 		returnValue = 101;
 
 		progressFrequencyMs = 1000;
-		when(mockExecutor.submit(mockCallable)).thenReturn(mockFuture);
+		doAnswer(new Answer<Future<Integer>>(){
+
+			@Override
+			public Future<Integer> answer(InvocationOnMock invocation)
+					throws Throwable {
+				Callable<Integer> callable = (Callable<Integer>) invocation.getArguments()[0];
+				callable.call();
+				return mockFuture;
+			}}).when(mockExecutor).submit(any(Callable.class));
 		// throw timeout twice then return a value.
 		when(mockFuture.get(anyLong(), any(TimeUnit.class)))
 				.thenThrow(new TimeoutException())
@@ -59,8 +66,9 @@ public class AutoProgressingCallableTest {
 		// call under test.
 		Integer result = auto.call(mockCallback);
 		assertEquals(returnValue, result);
-		verify(mockExecutor).submit(mockCallable);
+		verify(mockExecutor).submit(any(Callable.class));
 		verify(mockCallback, times(3)).progressMade(null);
+		verify(mockCallable).call(mockCallback);
 	}
 
 	@Test(expected = IllegalArgumentException.class)

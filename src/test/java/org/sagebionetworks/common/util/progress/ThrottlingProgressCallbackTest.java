@@ -1,44 +1,74 @@
 package org.sagebionetworks.common.util.progress;
 
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.verify;
+
 import org.junit.Before;
 import org.junit.Test;
-
-import static org.mockito.Mockito.*;
-
-import org.mockito.Mockito;
-import org.sagebionetworks.common.util.progress.ProgressCallback;
-import org.sagebionetworks.common.util.progress.ThrottlingProgressCallback;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 public class ThrottlingProgressCallbackTest {
 	
-	ProgressCallback<String> mockTarget;
+	@Mock
+	ProgressListener<String> mockListener;
 	
-	@SuppressWarnings("unchecked")
 	@Before
 	public void before(){
-		mockTarget = Mockito.mock(ProgressCallback.class);
+		MockitoAnnotations.initMocks(this);
+	}
+	
+	@Test (expected=IllegalArgumentException.class)
+	public void testThrottleDuplicateListener(){
+		long frequency = 1000;
+		ThrottlingProgressCallback<String> throttle = new ThrottlingProgressCallback<String>(frequency);
+		// call under test
+		throttle.addProgressListener(mockListener);
+		// this should fail
+		throttle.addProgressListener(mockListener);
 	}
 	
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testThrottle() throws InterruptedException{
 		long frequency = 1000;
-		ThrottlingProgressCallback<String> throttle = new ThrottlingProgressCallback<String>(mockTarget, frequency);
+		int maxNumberListeners = 1;
+		ThrottlingProgressCallback<String> throttle = new ThrottlingProgressCallback<String>(frequency);
+		throttle.addProgressListener(mockListener);
 		// the first call should get forwarded
 		throttle.progressMade("foo");
-		verify(mockTarget).progressMade("foo");
-		reset(mockTarget);
+		verify(mockListener).progressMade("foo");
+		reset(mockListener);
 		// Next call should not go through
 		throttle.progressMade("foo");
-		verify(mockTarget, never()).progressMade(anyString());
+		verify(mockListener, never()).progressMade(anyString());
 		// wait for enough to to pass.
 		Thread.sleep(frequency+1);
 		throttle.progressMade("foo");
-		verify(mockTarget).progressMade("foo");
-		reset(mockTarget);
+		verify(mockListener).progressMade("foo");
+		reset(mockListener);
 		// Next call should not go through
 		throttle.progressMade("foo");
-		verify(mockTarget, never()).progressMade(anyString());
+		verify(mockListener, never()).progressMade(anyString());
+	}
+
+	
+	@Test
+	public void testRemoveListeners() throws InterruptedException{
+		long frequency = 1;
+		int maxNumberListeners = 1;
+		ThrottlingProgressCallback<String> throttle = new ThrottlingProgressCallback<String>(frequency);
+		throttle.addProgressListener(mockListener);
+		throttle.progressMade("foo");
+		verify(mockListener).progressMade("foo");
+		reset(mockListener);
+		// wait for enough to to pass.
+		Thread.sleep(frequency+1);
+		throttle.removeProgressListener(mockListener);
+		throttle.progressMade("foo");
+		verify(mockListener, never()).progressMade("foo");
 	}
 
 }
