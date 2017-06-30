@@ -35,7 +35,7 @@ public class AutoProgressingCallableTest {
 	@Mock
 	ProgressingCallable<Integer> mockCallable;
 	@Mock
-	AbstractProgressCallback mockCallback;
+	SynchronizedProgressCallback mockCallback;
 
 	AutoProgressingCallable<Integer> auto;
 
@@ -72,7 +72,7 @@ public class AutoProgressingCallableTest {
 		Integer result = auto.call((ProgressCallback)mockCallback);
 		assertEquals(returnValue, result);
 		verify(mockExecutor).submit(any(Callable.class));
-		verify(mockCallback, times(3)).progressMade();
+		verify(mockCallback, times(3)).fireProgressMade();
 		verify(mockCallable).call(mockCallback);
 	}
 

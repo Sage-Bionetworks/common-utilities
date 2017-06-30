@@ -9,9 +9,9 @@ import org.mockito.MockitoAnnotations;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
-public class AbstractProgressCallbackTest {
+public class SynchronizedProgressCallbackTest {
 
-	AbstractProgressCallback abstractProgressCallback;
+	SynchronizedProgressCallback synchronizedProgressCallback;
 	
 	@Mock
 	ProgressListener mockProgressListner;
@@ -24,29 +24,29 @@ public class AbstractProgressCallbackTest {
 	public void before(){
 		MockitoAnnotations.initMocks(this);
 		// use the simple callback for testing.
-		abstractProgressCallback = new SimpleProgressCallback();
+		synchronizedProgressCallback = new SynchronizedProgressCallback();
 		typeOneCallCount = 0;
 		typeTwoCallCount = 0;
 	}
 	
 	@Test (expected=IllegalArgumentException.class)
 	public void testAddListnerNull(){
-		abstractProgressCallback.addProgressListener(null);
+		synchronizedProgressCallback.addProgressListener(null);
 	}
 	
 	@Test
 	public void testAddListner(){
 		// call under test
-		abstractProgressCallback.addProgressListener(mockProgressListner);
-		abstractProgressCallback.fireProgressMade();
+		synchronizedProgressCallback.addProgressListener(mockProgressListner);
+		synchronizedProgressCallback.fireProgressMade();
 		verify(mockProgressListner, times(1)).progressMade();
 	}
 	
 	@Test (expected=IllegalArgumentException.class)
 	public void testAddListnerDuplicate(){
 		// call under test
-		abstractProgressCallback.addProgressListener(mockProgressListner);
-		abstractProgressCallback.addProgressListener(mockProgressListner);
+		synchronizedProgressCallback.addProgressListener(mockProgressListner);
+		synchronizedProgressCallback.addProgressListener(mockProgressListner);
 	}
 	
 	@Test
@@ -54,10 +54,10 @@ public class AbstractProgressCallbackTest {
 		ProgressListener typeOneInstanceOne = createAnonymousInnerOne();
 		ProgressListener typeOneInstanceTwo = createAnonymousInnerOne();
 		// call under test
-		abstractProgressCallback.addProgressListener(typeOneInstanceOne);
+		synchronizedProgressCallback.addProgressListener(typeOneInstanceOne);
 		try{
 			// should fail on added of a second instance of the same type.
-			abstractProgressCallback.addProgressListener(typeOneInstanceTwo);
+			synchronizedProgressCallback.addProgressListener(typeOneInstanceTwo);
 			fail("Should have thrown an exception");
 		} catch( IllegalArgumentException e){
 			// expected.
@@ -65,12 +65,12 @@ public class AbstractProgressCallbackTest {
 		
 		ProgressListener typeTwoInstanceOne = createAnonymousInnerTwo();
 		// should be able to add a different type.
-		abstractProgressCallback.addProgressListener(typeTwoInstanceOne);
+		synchronizedProgressCallback.addProgressListener(typeTwoInstanceOne);
 		
 		// Fire progress and check each type is called once.
 		assertEquals(0, typeOneCallCount);
 		assertEquals(0, typeTwoCallCount);
-		abstractProgressCallback.fireProgressMade();
+		synchronizedProgressCallback.fireProgressMade();
 		assertEquals(1, typeOneCallCount);
 		assertEquals(1, typeTwoCallCount);
 		
@@ -107,15 +107,15 @@ public class AbstractProgressCallbackTest {
 	@Test (expected=IllegalArgumentException.class)
 	public void testRemoveListnerNull(){
 		// call under test
-		abstractProgressCallback.removeProgressListener(null);
+		synchronizedProgressCallback.removeProgressListener(null);
 	}
 	
 	@Test
 	public void testRemoveListner(){
-		abstractProgressCallback.addProgressListener(mockProgressListner);
+		synchronizedProgressCallback.addProgressListener(mockProgressListner);
 		// call under test
-		abstractProgressCallback.removeProgressListener(mockProgressListner);
-		abstractProgressCallback.fireProgressMade();
+		synchronizedProgressCallback.removeProgressListener(mockProgressListner);
+		synchronizedProgressCallback.fireProgressMade();
 		verify(mockProgressListner, never()).progressMade();
 	}
 

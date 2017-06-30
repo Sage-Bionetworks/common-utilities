@@ -11,7 +11,7 @@ import java.util.Map;
  * listeners.
  *
  */
-public abstract class AbstractProgressCallback implements ProgressCallback, ProgressListener {
+public class SynchronizedProgressCallback implements ProgressCallback {
 
 	/*
 	 * The map of all listeners. This map is not synchronized, so all access to

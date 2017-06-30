@@ -15,7 +15,7 @@ public class AutoProgressingRunnerTest {
 	@Mock
 	ProgressingRunner mockRunner;
 	@Mock
-	AbstractProgressCallback mockCallback;
+	SynchronizedProgressCallback mockCallback;
 	
 	long progressFrequencyMs;
 	
@@ -39,7 +39,7 @@ public class AutoProgressingRunnerTest {
 		AutoProgressingRunner autoRunner = new AutoProgressingRunner(mockRunner, progressFrequencyMs);
 		autoRunner.run(mockCallback);
 		// progress should be made at least three times
-		verify(mockCallback, atLeast(3)).progressMade();
+		verify(mockCallback, atLeast(3)).fireProgressMade();
 		verify(mockRunner).run(mockCallback);
 	}
 

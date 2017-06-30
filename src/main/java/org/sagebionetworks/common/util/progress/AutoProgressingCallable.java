@@ -53,12 +53,12 @@ public class AutoProgressingCallable<R> implements ProgressingCallable<R> {
 	}
 
 	/**
-	 * The actual call method requires an {@link AbstractProgressCallback}.
+	 * The actual call method requires an {@link SynchronizedProgressCallback}.
 	 * @param callback
 	 * @return
 	 * @throws Exception
 	 */
-	private R call(final AbstractProgressCallback callback) throws Exception {
+	private R call(final SynchronizedProgressCallback callback) throws Exception {
 		// start the process
 		Future<R> future = executor.submit(new Callable<R>(){
 			@Override
@@ -66,7 +66,7 @@ public class AutoProgressingCallable<R> implements ProgressingCallable<R> {
 				return callable.call(callback);
 			}});
 		// make progress at least once.
-		callback.progressMade();
+		callback.fireProgressMade();
 		while (true) {
 			// wait for the process to finish
 			try {
@@ -80,17 +80,17 @@ public class AutoProgressingCallable<R> implements ProgressingCallable<R> {
 				throw e;
 			}catch (TimeoutException e) {
 				// make progress for each timeout
-				callback.progressMade();
+				callback.fireProgressMade();
 			}
 		}
 	}
 
 	@Override
 	public R call(ProgressCallback callback) throws Exception {
-		if(!(callback instanceof AbstractProgressCallback)){
+		if(!(callback instanceof SynchronizedProgressCallback)){
 			throw new IllegalArgumentException("ProgressCallback must extend AbstractProgressCallback");
 		}
-		return this.call((AbstractProgressCallback)callback);
+		return this.call((SynchronizedProgressCallback)callback);
 	}
 
 }
