@@ -13,7 +13,7 @@ import org.mockito.MockitoAnnotations;
 public class ThrottlingProgressCallbackTest {
 	
 	@Mock
-	ProgressListener<String> mockListener;
+	ProgressListener mockListener;
 	
 	@Before
 	public void before(){
@@ -23,7 +23,7 @@ public class ThrottlingProgressCallbackTest {
 	@Test (expected=IllegalArgumentException.class)
 	public void testThrottleDuplicateListener(){
 		long frequency = 1000;
-		ThrottlingProgressCallback<String> throttle = new ThrottlingProgressCallback<String>(frequency);
+		ThrottlingProgressCallback throttle = new ThrottlingProgressCallback(frequency);
 		// call under test
 		throttle.addProgressListener(mockListener);
 		// this should fail
@@ -34,41 +34,39 @@ public class ThrottlingProgressCallbackTest {
 	@Test
 	public void testThrottle() throws InterruptedException{
 		long frequency = 1000;
-		int maxNumberListeners = 1;
-		ThrottlingProgressCallback<String> throttle = new ThrottlingProgressCallback<String>(frequency);
+		ThrottlingProgressCallback throttle = new ThrottlingProgressCallback(frequency);
 		throttle.addProgressListener(mockListener);
 		// the first call should get forwarded
-		throttle.progressMade("foo");
-		verify(mockListener).progressMade("foo");
+		throttle.progressMade();
+		verify(mockListener).progressMade();
 		reset(mockListener);
 		// Next call should not go through
-		throttle.progressMade("foo");
-		verify(mockListener, never()).progressMade(anyString());
+		throttle.progressMade();
+		verify(mockListener, never()).progressMade();
 		// wait for enough to to pass.
 		Thread.sleep(frequency+1);
-		throttle.progressMade("foo");
-		verify(mockListener).progressMade("foo");
+		throttle.progressMade();
+		verify(mockListener).progressMade();
 		reset(mockListener);
 		// Next call should not go through
-		throttle.progressMade("foo");
-		verify(mockListener, never()).progressMade(anyString());
+		throttle.progressMade();
+		verify(mockListener, never()).progressMade();
 	}
 
 	
 	@Test
 	public void testRemoveListeners() throws InterruptedException{
 		long frequency = 1;
-		int maxNumberListeners = 1;
-		ThrottlingProgressCallback<String> throttle = new ThrottlingProgressCallback<String>(frequency);
+		ThrottlingProgressCallback throttle = new ThrottlingProgressCallback(frequency);
 		throttle.addProgressListener(mockListener);
-		throttle.progressMade("foo");
-		verify(mockListener).progressMade("foo");
+		throttle.progressMade();
+		verify(mockListener).progressMade();
 		reset(mockListener);
 		// wait for enough to to pass.
 		Thread.sleep(frequency+1);
 		throttle.removeProgressListener(mockListener);
-		throttle.progressMade("foo");
-		verify(mockListener, never()).progressMade("foo");
+		throttle.progressMade();
+		verify(mockListener, never()).progressMade();
 	}
 
 }

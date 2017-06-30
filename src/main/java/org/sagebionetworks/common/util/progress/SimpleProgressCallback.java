@@ -6,11 +6,11 @@ package org.sagebionetworks.common.util.progress;
  *
  * @param <T>
  */
-public class SimpleProgressCallback<T> extends AbstractProgressCallback<T>{
-	
-	@Override
-	public void progressMade(T t) {
-		fireProgressMade(t);
-	}
+public class SimpleProgressCallback extends AbstractProgressCallback {
 
+	@Override
+	public void progressMade() {
+		fireProgressMade();
+	}
+	
 }

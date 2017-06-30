@@ -10,10 +10,8 @@ import java.util.Map;
  * Use {@link #fireProgressMade(Object)} to forward progress events to all
  * listeners.
  *
- * @param <T>
  */
-public abstract class AbstractProgressCallback<T> implements
-		ProgressCallback<T> {
+public abstract class AbstractProgressCallback implements ProgressCallback, ProgressListener {
 
 	/*
 	 * The map of all listeners. This map is not synchronized, so all access to
@@ -21,17 +19,17 @@ public abstract class AbstractProgressCallback<T> implements
 	 * ensure progress events are fired in the same order as listeners are
 	 * added.
 	 */
-	private Map<Class<? extends ProgressListener<T>>, ProgressListener<T>> listeners = new LinkedHashMap<Class<? extends ProgressListener<T>>, ProgressListener<T>>();
+	private Map<Class<? extends ProgressListener>, ProgressListener> listeners = new LinkedHashMap<Class<? extends ProgressListener>, ProgressListener>();
 
 	/**
 	 * Forward a progress event to all listeners.
 	 * 
 	 * @param t
 	 */
-	public synchronized void fireProgressMade(T t) {
-		for (Class<? extends ProgressListener<T>> key : listeners.keySet()) {
-			ProgressListener<T> listener = listeners.get(key);
-			listener.progressMade(t);
+	protected synchronized void fireProgressMade() {
+		for (Class<? extends ProgressListener> key : listeners.keySet()) {
+			ProgressListener listener = listeners.get(key);
+			listener.progressMade();
 		}
 	}
 
@@ -39,27 +37,27 @@ public abstract class AbstractProgressCallback<T> implements
 	 * 
 	 */
 	@Override
-	public synchronized void addProgressListener(ProgressListener<T> listener) {
+	public synchronized void addProgressListener(ProgressListener listener) {
 		if (listener == null) {
 			throw new IllegalArgumentException("Listener cannot be null");
 		}
-		Class<? extends ProgressListener<T>> key = (Class<? extends ProgressListener<T>>) listener
+		Class<? extends ProgressListener> key = (Class<? extends ProgressListener>) listener
 				.getClass();
 		if (listeners.containsKey(key)) {
 			throw new IllegalArgumentException(
 					"Cannot add more than one listener of type: "
 							+ key.getName()
-							+ ".  Please remove the prevesouly added listener before adding an additional listener.");
+							+ ".  Please remove the previously added listener before adding an additional listener.");
 		}
 		listeners.put(key, listener);
 	}
 
 	@Override
-	public synchronized void removeProgressListener(ProgressListener<T> listener) {
+	public synchronized void removeProgressListener(ProgressListener listener) {
 		if (listener == null) {
 			throw new IllegalArgumentException("Listener cannot be null");
 		}
-		Class<? extends ProgressListener<T>> key = (Class<? extends ProgressListener<T>>) listener
+		Class<? extends ProgressListener> key = (Class<? extends ProgressListener>) listener
 				.getClass();
 		listeners.remove(key);
 	}

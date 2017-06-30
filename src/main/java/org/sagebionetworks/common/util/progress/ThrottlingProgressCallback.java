@@ -16,7 +16,7 @@ import org.sagebionetworks.common.util.ClockImpl;
  * 
  * @param <T>
  */
-public final class ThrottlingProgressCallback<T> extends AbstractProgressCallback<T> {
+public final class ThrottlingProgressCallback extends AbstractProgressCallback {
 
 	long frequencyMS;
 	long lastFiredTime;
@@ -47,18 +47,17 @@ public final class ThrottlingProgressCallback<T> extends AbstractProgressCallbac
 	}
 
 
-	@Override
-	public void progressMade(T t) {
+	public void progressMade() {
 		long now = clock.currentTimeMillis();
 		if (this.lastFiredTime < 0) {
 			// first call is forwarded.
 			this.lastFiredTime = now;
-			fireProgressMade(t);
+			fireProgressMade();
 		} else {
 			if (now - this.lastFiredTime > frequencyMS) {
 				// first call is forwarded.
 				this.lastFiredTime = now;
-				fireProgressMade(t);
+				fireProgressMade();
 			}
 		}
 	}

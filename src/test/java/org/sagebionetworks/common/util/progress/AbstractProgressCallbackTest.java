@@ -3,6 +3,7 @@ package org.sagebionetworks.common.util.progress;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import static org.junit.Assert.*;
@@ -10,10 +11,10 @@ import static org.mockito.Mockito.*;
 
 public class AbstractProgressCallbackTest {
 
-	AbstractProgressCallback<Void> abstractProgressCallback;
+	AbstractProgressCallback abstractProgressCallback;
 	
 	@Mock
-	ProgressListener<Void> mockProgressListner;
+	ProgressListener mockProgressListner;
 	
 	private int typeOneCallCount;
 	private int typeTwoCallCount;
@@ -23,7 +24,7 @@ public class AbstractProgressCallbackTest {
 	public void before(){
 		MockitoAnnotations.initMocks(this);
 		// use the simple callback for testing.
-		abstractProgressCallback = new SimpleProgressCallback<Void>();
+		abstractProgressCallback = new SimpleProgressCallback();
 		typeOneCallCount = 0;
 		typeTwoCallCount = 0;
 	}
@@ -37,8 +38,8 @@ public class AbstractProgressCallbackTest {
 	public void testAddListner(){
 		// call under test
 		abstractProgressCallback.addProgressListener(mockProgressListner);
-		abstractProgressCallback.fireProgressMade(null);
-		verify(mockProgressListner, times(1)).progressMade(null);
+		abstractProgressCallback.fireProgressMade();
+		verify(mockProgressListner, times(1)).progressMade();
 	}
 	
 	@Test (expected=IllegalArgumentException.class)
@@ -50,8 +51,8 @@ public class AbstractProgressCallbackTest {
 	
 	@Test
 	public void testAddDuplicateAnonymousInnerClass(){
-		ProgressListener<Void> typeOneInstanceOne = createAnonymousInnerOne();
-		ProgressListener<Void> typeOneInstanceTwo = createAnonymousInnerOne();
+		ProgressListener typeOneInstanceOne = createAnonymousInnerOne();
+		ProgressListener typeOneInstanceTwo = createAnonymousInnerOne();
 		// call under test
 		abstractProgressCallback.addProgressListener(typeOneInstanceOne);
 		try{
@@ -62,14 +63,14 @@ public class AbstractProgressCallbackTest {
 			// expected.
 		}
 		
-		ProgressListener<Void> typeTwoInstanceOne = createAnonymousInnerTwo();
+		ProgressListener typeTwoInstanceOne = createAnonymousInnerTwo();
 		// should be able to add a different type.
 		abstractProgressCallback.addProgressListener(typeTwoInstanceOne);
 		
 		// Fire progress and check each type is called once.
 		assertEquals(0, typeOneCallCount);
 		assertEquals(0, typeTwoCallCount);
-		abstractProgressCallback.fireProgressMade(null);
+		abstractProgressCallback.fireProgressMade();
 		assertEquals(1, typeOneCallCount);
 		assertEquals(1, typeTwoCallCount);
 		
@@ -79,11 +80,11 @@ public class AbstractProgressCallbackTest {
 	 * Helper to create an anonymous inner ProgressListener class.
 	 * @return
 	 */
-	public ProgressListener<Void> createAnonymousInnerOne(){
-		return new ProgressListener<Void>() {
+	public ProgressListener createAnonymousInnerOne(){
+		return new ProgressListener() {
 			
 			@Override
-			public void progressMade(Void t) {
+			public void progressMade() {
 				typeOneCallCount++;
 			}
 		};
@@ -93,11 +94,11 @@ public class AbstractProgressCallbackTest {
 	 * Helper to create a different type of anonymous inner ProgressListener class.
 	 * @return
 	 */
-	public ProgressListener<Void> createAnonymousInnerTwo(){
-		return new ProgressListener<Void>() {
+	public ProgressListener createAnonymousInnerTwo(){
+		return new ProgressListener() {
 			
 			@Override
-			public void progressMade(Void t) {
+			public void progressMade() {
 				typeTwoCallCount++;
 			}
 		};
@@ -114,8 +115,8 @@ public class AbstractProgressCallbackTest {
 		abstractProgressCallback.addProgressListener(mockProgressListner);
 		// call under test
 		abstractProgressCallback.removeProgressListener(mockProgressListner);
-		abstractProgressCallback.fireProgressMade(null);
-		verify(mockProgressListner, never()).progressMade(null);
+		abstractProgressCallback.fireProgressMade();
+		verify(mockProgressListner, never()).progressMade();
 	}
 
 }

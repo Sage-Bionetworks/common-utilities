@@ -16,14 +16,11 @@ import java.util.concurrent.TimeoutException;
  * @param <R>
  *            The return type of the callable.
  *            {@link #call(Object)}.
- * @param <T>
- *            The parameter type passed to the
- *            {@link ProgressCallback#progressMade(Object)}.
  */
-public class AutoProgressingCallable<R> implements ProgressingCallable<R, Void> {
+public class AutoProgressingCallable<R> implements ProgressingCallable<R> {
 
 	ExecutorService executor;
-	ProgressingCallable<R, Void> callable;
+	ProgressingCallable<R> callable;
 	long progressFrequencyMs;
 
 	/**
@@ -42,7 +39,7 @@ public class AutoProgressingCallable<R> implements ProgressingCallable<R, Void> 
 	 *            The parameter to be passed to the progress callback.
 	 */
 	public AutoProgressingCallable(ExecutorService executor,
-			ProgressingCallable<R, Void> callable, long progressFrequencyMs) {
+			ProgressingCallable<R> callable, long progressFrequencyMs) {
 		super();
 		if(executor == null){
 			throw new IllegalArgumentException("Executor cannot be null");
@@ -55,8 +52,13 @@ public class AutoProgressingCallable<R> implements ProgressingCallable<R, Void> 
 		this.progressFrequencyMs = progressFrequencyMs;
 	}
 
-	@Override
-	public R call(final ProgressCallback<Void> callback) throws Exception {
+	/**
+	 * The actual call method requires an {@link AbstractProgressCallback}.
+	 * @param callback
+	 * @return
+	 * @throws Exception
+	 */
+	private R call(final AbstractProgressCallback callback) throws Exception {
 		// start the process
 		Future<R> future = executor.submit(new Callable<R>(){
 			@Override
@@ -64,7 +66,7 @@ public class AutoProgressingCallable<R> implements ProgressingCallable<R, Void> 
 				return callable.call(callback);
 			}});
 		// make progress at least once.
-		callback.progressMade(null);
+		callback.progressMade();
 		while (true) {
 			// wait for the process to finish
 			try {
@@ -78,9 +80,17 @@ public class AutoProgressingCallable<R> implements ProgressingCallable<R, Void> 
 				throw e;
 			}catch (TimeoutException e) {
 				// make progress for each timeout
-				callback.progressMade(null);
+				callback.progressMade();
 			}
 		}
+	}
+
+	@Override
+	public R call(ProgressCallback callback) throws Exception {
+		if(!(callback instanceof AbstractProgressCallback)){
+			throw new IllegalArgumentException("ProgressCallback must extend AbstractProgressCallback");
+		}
+		return this.call((AbstractProgressCallback)callback);
 	}
 
 }

@@ -13,9 +13,9 @@ import org.mockito.stubbing.Answer;
 public class AutoProgressingRunnerTest {
 
 	@Mock
-	ProgressingRunner<Void> mockRunner;
+	ProgressingRunner mockRunner;
 	@Mock
-	ProgressCallback<Void> mockCallback;
+	AbstractProgressCallback mockCallback;
 	
 	long progressFrequencyMs;
 	
@@ -39,7 +39,7 @@ public class AutoProgressingRunnerTest {
 		AutoProgressingRunner autoRunner = new AutoProgressingRunner(mockRunner, progressFrequencyMs);
 		autoRunner.run(mockCallback);
 		// progress should be made at least three times
-		verify(mockCallback, atLeast(3)).progressMade(null);
+		verify(mockCallback, atLeast(3)).progressMade();
 		verify(mockRunner).run(mockCallback);
 	}
 

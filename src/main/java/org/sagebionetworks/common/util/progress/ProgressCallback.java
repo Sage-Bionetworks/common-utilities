@@ -1,14 +1,10 @@
 package org.sagebionetworks.common.util.progress;
 
 /**
- * A callback for workers that need to notify containers that progress is being
- * made.
+ * A callback that will notify progress listeners when progress is made.
  *
- * @param <T>
- *            The parameter type passed to the
- *            {@link ProgressCallback#progressMade(Object)}.
  */
-public interface ProgressCallback<T> extends ProgressListener<T> {
+public interface ProgressCallback {
 
 	/**
 	 * Progress listeners are notified as progress is made. Listeners must be
@@ -16,7 +12,7 @@ public interface ProgressCallback<T> extends ProgressListener<T> {
 	 * 
 	 * @param listener
 	 */
-	public void addProgressListener(ProgressListener<T> listener);
+	public void addProgressListener(ProgressListener listener);
 
 	/**
 	 * Remove the given progress listener. The given listener will no longer
@@ -24,5 +20,5 @@ public interface ProgressCallback<T> extends ProgressListener<T> {
 	 * 
 	 * @param listener
 	 */
-	public void removeProgressListener(ProgressListener<T> listener);
+	public void removeProgressListener(ProgressListener listener);
 }
