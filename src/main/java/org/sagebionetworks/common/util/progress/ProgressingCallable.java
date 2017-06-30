@@ -10,11 +10,8 @@ import java.util.concurrent.Callable;
  * @param <R>
  *            The return type of the callable.
  *            {@link #call(Object)}.
- * @param <T>
- *            The parameter type passed to the
- *            {@link ProgressCallback#progressMade(Object)}.
  * */
-public interface ProgressingCallable<R, T> {
+public interface ProgressingCallable<R> {
 
 	/**
 	 * Similar to {@link Callable#call()} except a {@link ProgressCallback} is
@@ -25,6 +22,6 @@ public interface ProgressingCallable<R, T> {
 	 * @return
 	 * @throws Exception
 	 */
-	public R call(ProgressCallback<T> callback) throws Exception;
+	public R call(ProgressCallback callback) throws Exception;
 
 }

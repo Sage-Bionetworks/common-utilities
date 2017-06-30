@@ -3,7 +3,11 @@ package org.sagebionetworks.common.util.progress;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -15,6 +19,7 @@ import java.util.concurrent.TimeoutException;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -28,9 +33,9 @@ public class AutoProgressingCallableTest {
 	Future<Integer> mockFuture;
 
 	@Mock
-	ProgressingCallable<Integer, Void> mockCallable;
+	ProgressingCallable<Integer> mockCallable;
 	@Mock
-	ProgressCallback<Void> mockCallback;
+	SynchronizedProgressCallback mockCallback;
 
 	AutoProgressingCallable<Integer> auto;
 
@@ -64,10 +69,10 @@ public class AutoProgressingCallableTest {
 	@Test
 	public void testCallHappy() throws Exception {
 		// call under test.
-		Integer result = auto.call(mockCallback);
+		Integer result = auto.call((ProgressCallback)mockCallback);
 		assertEquals(returnValue, result);
 		verify(mockExecutor).submit(any(Callable.class));
-		verify(mockCallback, times(3)).progressMade(null);
+		verify(mockCallback, times(3)).fireProgressMade();
 		verify(mockCallable).call(mockCallback);
 	}
 
@@ -93,6 +98,15 @@ public class AutoProgressingCallableTest {
 		mockCallable = null;
 		auto = new AutoProgressingCallable<Integer>(mockExecutor,
 				mockCallable, progressFrequencyMs);
+	}
+	
+	@Test (expected=IllegalArgumentException.class)
+	public void testNonAbstractProgressListner() throws Exception{
+		// A non-abstract callback
+		ProgressCallback callback = Mockito.mock(ProgressCallback.class);
+		
+		// call under test
+		this.auto.call(callback);
 	}
 	
 

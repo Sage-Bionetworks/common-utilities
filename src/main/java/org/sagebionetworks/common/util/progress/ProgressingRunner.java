@@ -7,7 +7,7 @@ package org.sagebionetworks.common.util.progress;
  *            The parameter type passed to the
  *            {@link ProgressCallback#progressMade(Object)}.
  */
-public interface ProgressingRunner<T> {
+public interface ProgressingRunner {
 
 	/**
 	 * The main run() method for this runner.
@@ -17,6 +17,6 @@ public interface ProgressingRunner<T> {
 	 *            {@link ProgressCallback#progressMade(Object)} to notify the
 	 *            container that progress is being made.
 	 */
-	public void run(ProgressCallback<T> progressCallback) throws Exception;
+	public void run(ProgressCallback progressCallback) throws Exception;
 
 }
