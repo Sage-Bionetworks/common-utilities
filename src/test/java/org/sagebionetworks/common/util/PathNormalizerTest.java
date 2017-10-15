@@ -1,4 +1,4 @@
-package org.sagebionetworks.common.util.progress;
+package org.sagebionetworks.common.util;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -94,7 +94,41 @@ public class PathNormalizerTest {
 	public void multipleV1s(){
 		assertEquals("/v1/repo/v1/entity", normalizeMethodSignature("/services-repository-develop-SNAPSHOT/repo/v1/v1/repo/v1/entity")); 
 	}
-	
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testIncludeNullHttpMethod() {
+		String s = normalizeMethodSignature(null, "/repo/v1/version");
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testIncludeEmptyHttpMethod() {
+		String s = normalizeMethodSignature("", "/repo/v1/version");
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testIncludeUnknownHttpMethod() {
+		String s = normalizeMethodSignature("METHOD", "/repo/v1/version");
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testNullRequestPath() {
+		String s = normalizeMethodSignature("GET", null);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testEmptyRequestPath() {
+		String s = normalizeMethodSignature("GET", "");
+	}
+
+	@Test
+	public void testIncludeKnownHttpMethods() {
+		assertEquals("POST /entity", normalizeMethodSignature("POST", "/repo/v1/entity"));
+		assertEquals("GET /entity", normalizeMethodSignature("GET", "/repo/v1/entity"));
+		assertEquals("PUT /entity", normalizeMethodSignature("PUT", "/repo/v1/entity"));
+		assertEquals("DELETE /entity", normalizeMethodSignature("DELETE", "/repo/v1/entity"));
+		assertEquals("POST /entity", normalizeMethodSignature("post", "/repo/v1/entity"));
+	}
+
 	public void moreThanOnePrefixBeforeServiceAndV1(){
 		assertEquals("/there/is/random/v1/included/syn12345", normalizeMethodSignature("/prefix/Should-Be/Delet-ed/repo/v1/there/is/random/v1/included/syn12345"));
 	}

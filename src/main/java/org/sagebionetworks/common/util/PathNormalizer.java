@@ -1,5 +1,7 @@
 package org.sagebionetworks.common.util;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -44,5 +46,25 @@ public class PathNormalizer {
 		}
 		matcher.appendTail(buffer);
 		return buffer.toString();
+	}
+
+	public static String normalizeMethodSignature(String httpMethod, String requestPath) {
+		List<String> allowedMethods = Arrays.asList("POST", "PUT", "GET", "DELETE", "OPTION");
+		if ((httpMethod == null) || (httpMethod.isEmpty())) {
+			throw new IllegalArgumentException("Method cannot be null or empty.");
+		} else {
+			httpMethod = httpMethod.toUpperCase();
+			boolean found = allowedMethods.contains(httpMethod);
+			if (! found) {
+				throw new IllegalArgumentException("Method must be \"POST\", \"PUT\", \"GET\", \"DELETE\" or \"OPTION\" ");
+			}
+		}
+		if ((requestPath == null) || (requestPath.isEmpty())) {
+			throw new IllegalArgumentException("RequestPath cannot be null or empty");
+		}
+		StringBuffer normalizedSig = new StringBuffer(httpMethod);
+		normalizedSig.append(" ");
+		normalizedSig.append(normalizeMethodSignature(requestPath));
+		return normalizedSig.toString();
 	}
 }
