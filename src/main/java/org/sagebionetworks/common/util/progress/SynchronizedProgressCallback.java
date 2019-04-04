@@ -26,7 +26,7 @@ public class SynchronizedProgressCallback implements ProgressCallback {
 	 * 
 	 * @param t
 	 */
-	protected synchronized void fireProgressMade() {
+	public synchronized void fireProgressMade() {
 		for (ProgressListener listener : listeners.values()) {
 			try {
 				listener.progressMade();
