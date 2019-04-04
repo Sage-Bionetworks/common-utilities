@@ -21,4 +21,12 @@ public interface ProgressCallback {
 	 * @param listener
 	 */
 	public void removeProgressListener(ProgressListener listener);
+
+
+	/**
+	 * Indicates whether the callers of this should terminate.
+	 * This occurs when something has gone wrong with the progress listeners
+	 * @return
+	 */
+	public boolean runnerShouldTerminate();
 }
