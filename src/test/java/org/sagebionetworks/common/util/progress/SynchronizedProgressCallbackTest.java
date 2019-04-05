@@ -2,8 +2,8 @@ package org.sagebionetworks.common.util.progress;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Answers;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import static org.junit.Assert.*;
@@ -14,8 +14,12 @@ public class SynchronizedProgressCallbackTest {
 	SynchronizedProgressCallback synchronizedProgressCallback;
 	
 	@Mock
-	ProgressListener mockProgressListner;
-	
+	ProgressListener mockProgressListener;
+
+	static interface OtherProgressListenerInterface extends ProgressListener {}
+	@Mock
+	OtherProgressListenerInterface mockProgressListener2;
+
 	private int typeOneCallCount;
 	private int typeTwoCallCount;
 	
@@ -37,16 +41,16 @@ public class SynchronizedProgressCallbackTest {
 	@Test
 	public void testAddListner(){
 		// call under test
-		synchronizedProgressCallback.addProgressListener(mockProgressListner);
+		synchronizedProgressCallback.addProgressListener(mockProgressListener);
 		synchronizedProgressCallback.fireProgressMade();
-		verify(mockProgressListner, times(1)).progressMade();
+		verify(mockProgressListener, times(1)).progressMade();
 	}
 	
 	@Test (expected=IllegalArgumentException.class)
 	public void testAddListnerDuplicate(){
 		// call under test
-		synchronizedProgressCallback.addProgressListener(mockProgressListner);
-		synchronizedProgressCallback.addProgressListener(mockProgressListner);
+		synchronizedProgressCallback.addProgressListener(mockProgressListener);
+		synchronizedProgressCallback.addProgressListener(mockProgressListener);
 	}
 	
 	@Test
@@ -112,11 +116,56 @@ public class SynchronizedProgressCallbackTest {
 	
 	@Test
 	public void testRemoveListner(){
-		synchronizedProgressCallback.addProgressListener(mockProgressListner);
+		synchronizedProgressCallback.addProgressListener(mockProgressListener);
 		// call under test
-		synchronizedProgressCallback.removeProgressListener(mockProgressListner);
+		synchronizedProgressCallback.removeProgressListener(mockProgressListener);
 		synchronizedProgressCallback.fireProgressMade();
-		verify(mockProgressListner, never()).progressMade();
+		verify(mockProgressListener, never()).progressMade();
 	}
 
+	@Test
+	public void testRunnerShouldTerminate_progressListenersFailed(){
+		synchronizedProgressCallback.addProgressListener(mockProgressListener);
+		synchronizedProgressCallback.addProgressListener(mockProgressListener2);
+
+		//method under test
+		assertFalse(synchronizedProgressCallback.runnerShouldTerminate());
+
+		//make an exception occur for listeners
+		RuntimeException exception = new RuntimeException("test exception");
+		doThrow(exception).when(mockProgressListener).progressMade();
+		try {
+			synchronizedProgressCallback.fireProgressMade();
+			fail();
+		} catch (RuntimeException e){
+			assertEquals(exception, e);
+		}
+
+		//method under test
+		assertTrue(synchronizedProgressCallback.runnerShouldTerminate());
+
+		verify(mockProgressListener, times(1)).progressMade();
+		verifyZeroInteractions(mockProgressListener2);
+
+	}
+
+	@Test
+	public void testRunnerShouldTerminate_progressListenersNotFailed(){
+		synchronizedProgressCallback.addProgressListener(mockProgressListener);
+		synchronizedProgressCallback.addProgressListener(mockProgressListener2);
+
+		//method under test
+		assertFalse(synchronizedProgressCallback.runnerShouldTerminate());
+
+		//No exceptions occurred for listeners
+		doNothing().when(mockProgressListener).progressMade();
+
+		synchronizedProgressCallback.fireProgressMade();
+
+		//method under test
+		assertFalse(synchronizedProgressCallback.runnerShouldTerminate());
+
+		verify(mockProgressListener, times(1)).progressMade();
+		verify(mockProgressListener2, times(1)).progressMade();
+	}
 }

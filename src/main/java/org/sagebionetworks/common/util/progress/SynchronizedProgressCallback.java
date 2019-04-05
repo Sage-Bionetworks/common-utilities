@@ -20,17 +20,25 @@ public class SynchronizedProgressCallback implements ProgressCallback {
 	 * added.
 	 */
 	private Map<Class<? extends ProgressListener>, ProgressListener> listeners = new LinkedHashMap<Class<? extends ProgressListener>, ProgressListener>();
-
+	private boolean shouldTerminate = false;
 	/**
 	 * Forward a progress event to all listeners.
 	 * 
 	 * @param t
 	 */
 	protected synchronized void fireProgressMade() {
-		for (Class<? extends ProgressListener> key : listeners.keySet()) {
-			ProgressListener listener = listeners.get(key);
-			listener.progressMade();
+		for (ProgressListener listener : listeners.values()) {
+			try {
+				listener.progressMade();
+			}catch (Exception e){
+				this.shouldTerminate = true;
+				throw e;
+			}
 		}
+	}
+
+	public synchronized boolean runnerShouldTerminate() {
+		return shouldTerminate;
 	}
 
 	/**
