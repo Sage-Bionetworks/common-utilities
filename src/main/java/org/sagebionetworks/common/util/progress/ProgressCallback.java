@@ -25,7 +25,7 @@ public interface ProgressCallback {
 
 	/**
 	 * Indicates whether the callers of this should terminate.
-	 * This occurs when something has gone wrong with the progress listeners
+	 * This is set to true when a ProgressListener throws an exception.
 	 * @return
 	 */
 	public boolean runnerShouldTerminate();
