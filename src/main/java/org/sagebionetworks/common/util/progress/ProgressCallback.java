@@ -29,6 +29,4 @@ public interface ProgressCallback {
 	 * @return
 	 */
 	public boolean runnerShouldTerminate();
-
-	public void fireProgressMade();
 }
