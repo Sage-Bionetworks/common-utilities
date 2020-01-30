@@ -1,13 +1,20 @@
 package org.sagebionetworks.common.util.progress;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
+
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
 
 public class SynchronizedProgressCallbackTest {
 
@@ -23,12 +30,14 @@ public class SynchronizedProgressCallbackTest {
 	private int typeOneCallCount;
 	private int typeTwoCallCount;
 	
+	private long lockTimeoutSec;
 	
 	@Before
 	public void before(){
 		MockitoAnnotations.initMocks(this);
 		// use the simple callback for testing.
-		synchronizedProgressCallback = new SynchronizedProgressCallback();
+		lockTimeoutSec = 123L;
+		synchronizedProgressCallback = new SynchronizedProgressCallback(lockTimeoutSec);
 		typeOneCallCount = 0;
 		typeTwoCallCount = 0;
 	}
@@ -167,5 +176,10 @@ public class SynchronizedProgressCallbackTest {
 
 		verify(mockProgressListener, times(1)).progressMade();
 		verify(mockProgressListener2, times(1)).progressMade();
+	}
+	
+	@Test
+	public void testGetlockTimeoutSec() {
+		assertEquals(lockTimeoutSec, synchronizedProgressCallback.getLockTimeoutSeconds());
 	}
 }
