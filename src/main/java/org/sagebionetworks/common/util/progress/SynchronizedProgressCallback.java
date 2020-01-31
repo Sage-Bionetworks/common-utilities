@@ -21,6 +21,17 @@ public class SynchronizedProgressCallback implements ProgressCallback {
 	 */
 	private Map<Class<? extends ProgressListener>, ProgressListener> listeners = new LinkedHashMap<Class<? extends ProgressListener>, ProgressListener>();
 	private boolean shouldTerminate = false;
+	private long lockTimeoutSec;
+	
+	/**
+	 * 
+	 * @param lockTimeoutSec The timeout used by the stack in seconds.
+	 */
+	public SynchronizedProgressCallback(long lockTimeoutSec) {
+		super();
+		this.lockTimeoutSec = lockTimeoutSec;
+	}
+
 	/**
 	 * Forward a progress event to all listeners.
 	 * 
@@ -68,6 +79,11 @@ public class SynchronizedProgressCallback implements ProgressCallback {
 		Class<? extends ProgressListener> key = (Class<? extends ProgressListener>) listener
 				.getClass();
 		listeners.remove(key);
+	}
+
+	@Override
+	public long getLockTimeoutSeconds() {
+		return lockTimeoutSec;
 	}
 
 }

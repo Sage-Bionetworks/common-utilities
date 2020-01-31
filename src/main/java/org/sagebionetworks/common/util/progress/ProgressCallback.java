@@ -29,4 +29,10 @@ public interface ProgressCallback {
 	 * @return
 	 */
 	public boolean runnerShouldTerminate();
+	
+	/**
+	 * Get the lock timeout for the stack in seconds.
+	 * @return
+	 */
+	public long getLockTimeoutSeconds();
 }
