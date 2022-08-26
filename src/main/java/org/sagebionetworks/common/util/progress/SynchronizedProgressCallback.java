@@ -1,7 +1,12 @@
 package org.sagebionetworks.common.util.progress;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * A thread-safe abstract {@link ProgressCallback} that will only allow a single
@@ -13,6 +18,8 @@ import java.util.Map;
  */
 public class SynchronizedProgressCallback implements ProgressCallback {
 
+	private static final Logger log = LogManager
+			.getLogger(SynchronizedProgressCallback.class);
 	/*
 	 * The map of all listeners. This map is not synchronized, so all access to
 	 * it should only occur in synchronized methods. LinkedHashMap is used to
@@ -20,7 +27,6 @@ public class SynchronizedProgressCallback implements ProgressCallback {
 	 * added.
 	 */
 	private Map<Class<? extends ProgressListener>, ProgressListener> listeners = new LinkedHashMap<Class<? extends ProgressListener>, ProgressListener>();
-	private boolean shouldTerminate = false;
 	private long lockTimeoutSec;
 	
 	/**
@@ -38,19 +44,20 @@ public class SynchronizedProgressCallback implements ProgressCallback {
 	 * @param t
 	 */
 	protected synchronized void fireProgressMade() {
-		for (ProgressListener listener : listeners.values()) {
+		List<Class<? extends ProgressListener>> toRemove = new ArrayList<>();
+		listeners.forEach((key, listener) -> {
 			try {
 				listener.progressMade();
-			}catch (Exception e){
-				this.shouldTerminate = true;
-				throw e;
+			} catch (Exception e) {
+				log.error(String.format("ProgressListener: '%s' failed and will be removed.", key), e);
+				toRemove.add(key);
 			}
-		}
+		});
+		toRemove.forEach(key -> {
+			listeners.remove(key);
+		});
 	}
 
-	public synchronized boolean runnerShouldTerminate() {
-		return shouldTerminate;
-	}
 
 	/**
 	 * 

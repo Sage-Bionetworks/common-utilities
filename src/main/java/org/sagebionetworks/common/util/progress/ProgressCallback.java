@@ -22,13 +22,6 @@ public interface ProgressCallback {
 	 */
 	public void removeProgressListener(ProgressListener listener);
 
-
-	/**
-	 * Indicates whether the callers of this should terminate.
-	 * This is set to true when a ProgressListener throws an exception.
-	 * @return
-	 */
-	public boolean runnerShouldTerminate();
 	
 	/**
 	 * Get the lock timeout for the stack in seconds.
