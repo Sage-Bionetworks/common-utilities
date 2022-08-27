@@ -1,21 +1,19 @@
 package org.sagebionetworks.common.util.progress;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.doNothing;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+@ExtendWith(MockitoExtension.class)
 public class SynchronizedProgressCallbackTest {
 
 	SynchronizedProgressCallback synchronizedProgressCallback;
@@ -32,9 +30,8 @@ public class SynchronizedProgressCallbackTest {
 	
 	private long lockTimeoutSec;
 	
-	@Before
+	@BeforeEach
 	public void before(){
-		MockitoAnnotations.initMocks(this);
 		// use the simple callback for testing.
 		lockTimeoutSec = 123L;
 		synchronizedProgressCallback = new SynchronizedProgressCallback(lockTimeoutSec);
@@ -42,9 +39,11 @@ public class SynchronizedProgressCallbackTest {
 		typeTwoCallCount = 0;
 	}
 	
-	@Test (expected=IllegalArgumentException.class)
+	@Test
 	public void testAddListnerNull(){
-		synchronizedProgressCallback.addProgressListener(null);
+		assertThrows(IllegalArgumentException.class, ()->{
+			synchronizedProgressCallback.addProgressListener(null);
+		});
 	}
 	
 	@Test
@@ -55,11 +54,13 @@ public class SynchronizedProgressCallbackTest {
 		verify(mockProgressListener, times(1)).progressMade();
 	}
 	
-	@Test (expected=IllegalArgumentException.class)
+	@Test
 	public void testAddListnerDuplicate(){
-		// call under test
 		synchronizedProgressCallback.addProgressListener(mockProgressListener);
-		synchronizedProgressCallback.addProgressListener(mockProgressListener);
+		assertThrows(IllegalArgumentException.class, ()->{
+			// call under test
+			synchronizedProgressCallback.addProgressListener(mockProgressListener);
+		});
 	}
 	
 	@Test
@@ -68,13 +69,11 @@ public class SynchronizedProgressCallbackTest {
 		ProgressListener typeOneInstanceTwo = createAnonymousInnerOne();
 		// call under test
 		synchronizedProgressCallback.addProgressListener(typeOneInstanceOne);
-		try{
+		
+		assertThrows(IllegalArgumentException.class, ()->{
 			// should fail on added of a second instance of the same type.
 			synchronizedProgressCallback.addProgressListener(typeOneInstanceTwo);
-			fail("Should have thrown an exception");
-		} catch( IllegalArgumentException e){
-			// expected.
-		}
+		});
 		
 		ProgressListener typeTwoInstanceOne = createAnonymousInnerTwo();
 		// should be able to add a different type.
@@ -117,10 +116,12 @@ public class SynchronizedProgressCallbackTest {
 		};
 	}
 	
-	@Test (expected=IllegalArgumentException.class)
+	@Test
 	public void testRemoveListnerNull(){
-		// call under test
-		synchronizedProgressCallback.removeProgressListener(null);
+		assertThrows(IllegalArgumentException.class, ()->{
+			// call under test
+			synchronizedProgressCallback.removeProgressListener(null);
+		});
 	}
 	
 	@Test
@@ -133,48 +134,28 @@ public class SynchronizedProgressCallbackTest {
 	}
 
 	@Test
-	public void testRunnerShouldTerminate_progressListenersFailed(){
+	public void testFireProgressMadeWithException(){
 		synchronizedProgressCallback.addProgressListener(mockProgressListener);
 		synchronizedProgressCallback.addProgressListener(mockProgressListener2);
 
-		//method under test
-		assertFalse(synchronizedProgressCallback.runnerShouldTerminate());
-
-		//make an exception occur for listeners
 		RuntimeException exception = new RuntimeException("test exception");
 		doThrow(exception).when(mockProgressListener).progressMade();
-		try {
-			synchronizedProgressCallback.fireProgressMade();
-			fail();
-		} catch (RuntimeException e){
-			assertEquals(exception, e);
-		}
-
-		//method under test
-		assertTrue(synchronizedProgressCallback.runnerShouldTerminate());
-
-		verify(mockProgressListener, times(1)).progressMade();
-		verifyZeroInteractions(mockProgressListener2);
-
-	}
-
-	@Test
-	public void testRunnerShouldTerminate_progressListenersNotFailed(){
-		synchronizedProgressCallback.addProgressListener(mockProgressListener);
-		synchronizedProgressCallback.addProgressListener(mockProgressListener2);
-
-		//method under test
-		assertFalse(synchronizedProgressCallback.runnerShouldTerminate());
-
-		//No exceptions occurred for listeners
-		doNothing().when(mockProgressListener).progressMade();
-
+		
+		// call under test
 		synchronizedProgressCallback.fireProgressMade();
 
-		//method under test
-		assertFalse(synchronizedProgressCallback.runnerShouldTerminate());
-
 		verify(mockProgressListener, times(1)).progressMade();
+		// progress should be made for the second listener even thought the first threw an exception.
+		verify(mockProgressListener2, times(1)).progressMade();
+		
+		reset(mockProgressListener);
+		reset(mockProgressListener2);
+		
+		// call under test
+		synchronizedProgressCallback.fireProgressMade();
+		
+		// the first progress listener should have been removed after throwing an exception.
+		verify(mockProgressListener, never()).progressMade();
 		verify(mockProgressListener2, times(1)).progressMade();
 	}
 	
